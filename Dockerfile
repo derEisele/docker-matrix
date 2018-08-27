@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM ubuntu:latest
 
 # Maintainer
 MAINTAINER Andreas Peters <support@aventer.biz>
@@ -20,7 +20,7 @@ VOLUME ["/data"]
 # Git branch to build from
 ARG BV_SYN=master
 ARG BV_TUR=master
-ARG TAG_SYN=v0.33.2
+ARG TAG_SYN=v0.33.3
 
 # user configuration
 ENV MATRIX_UID=991 MATRIX_GID=991
@@ -43,7 +43,7 @@ RUN set -ex \
         libevent-dev \
         libffi-dev \
         libgnutls28-dev \
-        libjpeg62-turbo-dev \
+        libjpeg-turbo8-dev \
         libldap2-dev \
         libsasl2-dev \
         libsqlite3-dev \
@@ -51,41 +51,40 @@ RUN set -ex \
         libtool \
         libxml2-dev \
         libxslt1-dev \
-        linux-headers-amd64 \
         make \
-        python-dev \
-        python-setuptools \
+        pypy-dev \
         zlib1g-dev \
+        libpq-dev \
+        curl \
+        ca-certificates \
     ' \
     && apt-get install -y --no-install-recommends \
         $buildDeps \
         bash \
         coreutils \
         coturn \
-        libevent-2.0-5 \
+        libevent-2.1-6 \
         libffi6 \
-        libjpeg62-turbo \
+        libjpeg-turbo8 \
         libldap-2.4-2 \
         libssl1.1 \
         libtool \
         libxml2 \
         libxslt1.1 \
         pwgen \
-        python \
-        python-pip \
-        python-psycopg2 \
-        python-virtualenv \
-	python-jinja2 \
+        pypy \
         sqlite \
         zlib1g \
     ; \
+    curl https://bootstrap.pypa.io/get-pip.py | pypy - ;\
     pip install --upgrade wheel ;\
     pip install --upgrade python-ldap ;\
     pip install --upgrade pyopenssl ;\
     pip install --upgrade enum34 ;\
     pip install --upgrade ipaddress ;\
-    pip install --upgrade lxml ;\
-    pip install --upgrade supervisor \
+    pip install --upgrade supervisor ;\
+    pip install --upgrade psycopg2cffi ;\
+    echo "from psycopg2cffi import compat; compat.register()" >> /usr/local/lib/pypy2.7/dist-packages/psycopg2.py ;\
     ; \
     git clone --branch $BV_SYN --depth 1 https://github.com/matrix-org/synapse.git \
     && cd /synapse \
@@ -96,6 +95,6 @@ RUN set -ex \
     && cd / \
     && rm -rf /synapse \
     ; \
-    apt-get autoremove -y $buildDeps ; \
+    apt-get autoremove -y $buildDeps ;\
     apt-get autoremove -y ;\
     rm -rf /var/lib/apt/* /var/cache/apt/*

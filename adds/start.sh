@@ -24,11 +24,11 @@ generate_turn_key() {
 generate_synapse_file() {
 	local filepath="${1}"
 
-	python -m synapse.app.homeserver \
-	       --config-path "${filepath}" \
-	       --generate-config \
-	       --report-stats ${REPORT_STATS} \
-	       --server-name ${SERVER_NAME}
+	pypy -m synapse.app.homeserver \
+	     --config-path "${filepath}" \
+	     --generate-config \
+	     --report-stats ${REPORT_STATS} \
+	     --server-name ${SERVER_NAME}
 }
 
 configure_homeserver_yaml() {
@@ -198,4 +198,3 @@ case $OPTION in
 		echo "-=> unknown \'$OPTION\'"
 		;;
 esac
-
