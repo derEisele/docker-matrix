@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
 # Maintainer
-MAINTAINER Andreas Peters <support@aventer.biz>
+MAINTAINER Alexander Eisele <alexander@eiselecloud.de>
 
 # install homerserver template
 COPY adds/start.sh /start.sh
@@ -20,7 +20,7 @@ VOLUME ["/data"]
 # Git branch to build from
 ARG BV_SYN=master
 ARG BV_TUR=master
-ARG TAG_SYN=v0.33.3
+ARG TAG_SYN=v0.34.0
 
 # user configuration
 ENV MATRIX_UID=991 MATRIX_GID=991
@@ -84,12 +84,13 @@ RUN set -ex \
     pip install --upgrade ipaddress ;\
     pip install --upgrade supervisor ;\
     pip install --upgrade psycopg2cffi ;\
-    echo "from psycopg2cffi import compat; compat.register()" >> /usr/local/lib/pypy2.7/dist-packages/psycopg2.py ;\
+    echo "from psycopg2cffi import compat; compat.register()" >> /usr/local/lib/pypy2.7/dist-packages/psycopg2.py \
     ; \
-    git clone --branch $BV_SYN --depth 1 https://github.com/matrix-org/synapse.git \
-    && cd /synapse \
+    git clone --branch $TAG_SYN --depth 1 https://github.com/matrix-org/synapse.git \
+    && cd /synapse ;\
     git checkout tags/$TAG_SYN \
     && pip install --upgrade --process-dependency-links . \
+    && pip uninstall psycopg2 -y \
     && GIT_SYN=$(git ls-remote https://github.com/matrix-org/synapse $BV_SYN | cut -f 1) \
     && echo "synapse: $BV_SYN ($GIT_SYN)" >> /synapse.version \
     && cd / \
